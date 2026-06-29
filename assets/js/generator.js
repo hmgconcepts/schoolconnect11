@@ -1450,17 +1450,19 @@ const CBTUI = {
   async refresh(){
     const box = document.getElementById('cbt-list');
     if(!sb){ box.innerHTML = '<div class="card">⚠️ Database not configured. Add your Supabase keys in assets/js/config.js.</div>'; return; }
-    const { data, error } = await CBT.listExams();
-    if(error){ box.innerHTML = '<div class="card">Could not load exams: '+esc(error.message)+'</div>'; return; }
-    if(!data || !data.length){ box.innerHTML = '<div class="card">No exams yet. Click <strong>+ New Exam / Test</strong> to create one.</div>'; return; }
-    box.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Code</th><th>Subject</th><th>Type</th><th>Class</th><th>Report column</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+
-      data.map(e=>'<tr><td><strong>'+esc(e.code)+'</strong></td><td>'+esc(e.subject)+'</td><td>'+esc(e.assessment_type)+'</td><td>'+esc(e.class||'-')+'</td><td>'+esc(e.report_column||'-')+'</td><td>'+(e.is_open?'<span class=\\'badge badge-success\\'>Open</span>':'<span class=\\'badge\\'>Closed</span>')+'</td>'+
-        '<td style="white-space:nowrap">'+
-          '<button class="btn btn-sm btn-outline" onclick="CBTUI.toggle(\\''+e.id+'\\','+(!e.is_open)+')">'+(e.is_open?'Close':'Open')+'</button> '+
-          '<button class="btn btn-sm btn-outline" onclick="CBTUI.share(\\''+esc(e.code)+'\\')">Share</button> '+
-          '<button class="btn btn-sm btn-outline" onclick="CBTUI.results(\\''+e.id+'\\',\\''+esc(e.code)+'\\')">Results</button> '+
-          '<button class="btn btn-sm btn-outline" data-admin-only onclick="CBTUI.del(\\''+e.id+'\\')">Delete</button>'+
-        '</td></tr>').join('')+'</tbody></table></div>';
+    try {
+      const { data, error } = await CBT.listExams();
+      if(error){ box.innerHTML = '<div class="card">Could not load exams: '+esc(error.message)+'</div>'; return; }
+      if(!data || !data.length){ box.innerHTML = '<div class="card">No exams yet. Click <strong>+ New Exam / Test</strong> to create one.</div>'; return; }
+      box.innerHTML = '<div class="table-wrap"><table><thead><tr><th>Code</th><th>Subject</th><th>Type</th><th>Class</th><th>Report column</th><th>Status</th><th>Actions</th></tr></thead><tbody>'+
+        data.map(e=>'<tr><td><strong>'+esc(e.code)+'</strong></td><td>'+esc(e.subject)+'</td><td>'+esc(e.assessment_type)+'</td><td>'+esc(e.class||'-')+'</td><td>'+esc(e.report_column||'-')+'</td><td>'+(e.is_open?'<span class=\\'badge badge-success\\'>Open</span>':'<span class=\\'badge\\'>Closed</span>')+'</td>'+
+          '<td style="white-space:nowrap">'+
+            '<button class="btn btn-sm btn-outline" onclick="CBTUI.toggle(\\''+e.id+'\\','+(!e.is_open)+')">'+(e.is_open?'Close':'Open')+'</button> '+
+            '<button class="btn btn-sm btn-outline" onclick="CBTUI.share(\\''+esc(e.code)+'\\')">Share</button> '+
+            '<button class="btn btn-sm btn-outline" onclick="CBTUI.results(\\''+e.id+'\\',\\''+esc(e.code)+'\\')">Results</button> '+
+            '<button class="btn btn-sm btn-outline" data-admin-only onclick="CBTUI.del(\\''+e.id+'\\')">Delete</button>'+
+          '</td></tr>').join('')+'</tbody></table></div>';
+    } catch(err) { box.innerHTML = '<div class="card">Could not load exams: '+esc(err.message||err)+'</div>'; }
   },
   newExam(){
     const subj = (window.SCHOOL&&window.SCHOOL.modules)?'':'';
@@ -1639,7 +1641,7 @@ const CBTUI = {
   }
 };
 document.addEventListener('click', function(e){ var b=e.target.closest('[data-cbt-action]'); if(!b)return; e.preventDefault(); var fn=b.getAttribute('data-cbt-action'); if(CBTUI[fn]) CBTUI[fn](); });
-document.addEventListener('DOMContentLoaded', function(){ CBTUI.refresh(); }); CBTUI.refresh();
+document.addEventListener('DOMContentLoaded', function(){ try{CBTUI.refresh();}catch(e){} }); try{CBTUI.refresh();}catch(e){}
 </script>`;
   },
 
